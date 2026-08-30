@@ -1,0 +1,16 @@
+/.env
+/vendor/
+/node_modules/
+/public/assets/build/
+/public/uploads/*
+!/public/uploads/.htaccess
+!/public/uploads/.gitkeep
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+/.phpunit.cache/
+/coverage/
+*.zip

@@ -1,0 +1,393 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Dotenv\Dotenv;
+use SCTech\Core\Config;
+use SCTech\Core\Database;
+use SCTech\Core\LeadRetentionPurger;
+use SCTech\Core\LegalProfile;
+use SCTech\Core\MigrationAudit;
+
+$root = dirname(__DIR__);
+require $root . '/vendor/autoload.php';
+Dotenv::createImmutable($root)->safeLoad();
+
+$config = Config::fromDirectory($root . '/config');
+date_default_timezone_set($config->string('app.timezone', 'UTC'));
+$database = new Database($config);
+
+$command = $argv[1] ?? 'help';
+$options = parseOptions(array_slice($argv, 2));
+
+try {
+    $exitCode = match ($command) {
+        'migrate' => migrate($database->pdo(), $root),
+        'db:seed' => seed($database->pdo(), $root),
+        'admin:create' => createAdmin($database->pdo(), $options),
+        'cache:clear' => clearCache($root),
+        'housekeeping' => housekeeping($database->pdo(), $config),
+        'launch:check' => launchCheck($database->pdo(), $config, $root),
+        'help', '--help', '-h' => help(),
+        default => unknown($command),
+    };
+} catch (Throwable $exception) {
+    fwrite(STDERR, "Erreur: {$exception->getMessage()}\n");
+    $exitCode = 1;
+}
+
+exit($exitCode);
+
+/** @param list<string> $arguments
+ * @return array<string, string|bool>
+ */
+function parseOptions(array $arguments): array
+{
+    $options = [];
+    foreach ($arguments as $argument) {
+        if (!str_starts_with($argument, '--')) {
+            continue;
+        }
+        $parts = explode('=', substr($argument, 2), 2);
+        $key = (string) $parts[0];
+        $value = $parts[1] ?? true;
+        if ($key === '') {
+            continue;
+        }
+        $options[$key] = $value;
+    }
+
+    return $options;
+}
+
+function help(): int
+{
+    echo <<<'TEXT'
+SCTECH — commandes d’exploitation
+
+  php bin/console migrate
+  php bin/console db:seed
+  php bin/console admin:create --email=admin@example.com --name="Nom" --role=admin --password-stdin
+  php bin/console cache:clear
+  php bin/console housekeeping
+  php bin/console launch:check
+
+Pour admin:create, transmettez le mot de passe via --password-stdin ou la variable
+temporaire ADMIN_INITIAL_PASSWORD. Aucun compte ni mot de passe par défaut n’existe.
+TEXT;
+    echo PHP_EOL;
+
+    return 0;
+}
+
+function unknown(string $command): int
+{
+    fwrite(STDERR, sprintf("Commande inconnue: %s\n\n", $command));
+    help();
+
+    return 2;
+}
+
+function migrate(PDO $pdo, string $root): int
+{
+    $pdo->exec(<<<'SQL'
+        CREATE TABLE IF NOT EXISTS migrations (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            version VARCHAR(190) NOT NULL,
+            checksum CHAR(64) NOT NULL,
+            applied_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+            PRIMARY KEY (id),
+            UNIQUE KEY uq_migrations_version (version)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        SQL);
+
+    $files = glob($root . '/database/migrations/*.sql') ?: [];
+    sort($files, SORT_STRING);
+    foreach ($files as $file) {
+        $version = pathinfo($file, PATHINFO_FILENAME);
+        $sql = (string) file_get_contents($file);
+        $checksum = hash('sha256', $sql);
+        $read = $pdo->prepare('SELECT checksum FROM migrations WHERE version = :version');
+        $read->execute(['version' => $version]);
+        $stored = $read->fetchColumn();
+        if (is_string($stored)) {
+            if (!hash_equals($stored, $checksum)) {
+                throw new RuntimeException("La migration {$version} a changé après son application.");
+            }
+            echo "déjà appliquée  {$version}\n";
+            continue;
+        }
+
+        // MySQL/MariaDB DDL commits implicitly, so migration tracking is written only after every statement succeeds.
+        executeSql($pdo, $sql);
+        $insert = $pdo->prepare('INSERT INTO migrations (version, checksum) VALUES (:version, :checksum)');
+        $insert->execute(['version' => $version, 'checksum' => $checksum]);
+        echo "appliquée       {$version}\n";
+    }
+
+    return 0;
+}
+
+function seed(PDO $pdo, string $root): int
+{
+    $files = glob($root . '/database/seeds/*.sql') ?: [];
+    sort($files, SORT_STRING);
+    foreach ($files as $file) {
+        executeSql($pdo, (string) file_get_contents($file));
+        echo 'chargé           ' . basename($file) . PHP_EOL;
+    }
+
+    return 0;
+}
+
+/** @param array<string, string|bool> $options */
+function createAdmin(PDO $pdo, array $options): int
+{
+    $email = mb_strtolower(trim((string) ($options['email'] ?? '')), 'UTF-8');
+    $name = trim((string) ($options['name'] ?? ''));
+    $role = trim((string) ($options['role'] ?? 'admin'));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 254) {
+        throw new InvalidArgumentException('Fournissez une adresse e-mail valide avec --email.');
+    }
+    if (mb_strlen($name) < 2 || mb_strlen($name) > 120) {
+        throw new InvalidArgumentException('Fournissez un nom de 2 à 120 caractères avec --name.');
+    }
+    if (!in_array($role, ['admin', 'editor'], true)) {
+        throw new InvalidArgumentException('Le rôle doit être admin ou editor.');
+    }
+
+    $password = (string) ($_ENV['ADMIN_INITIAL_PASSWORD'] ?? $_SERVER['ADMIN_INITIAL_PASSWORD'] ?? '');
+    if (($options['password-stdin'] ?? false) === true) {
+        $password = trim((string) stream_get_contents(STDIN));
+    }
+    if (strlen($password) < 14
+        || preg_match('/[a-z]/', $password) !== 1
+        || preg_match('/[A-Z]/', $password) !== 1
+        || preg_match('/[0-9]/', $password) !== 1
+        || preg_match('/[^A-Za-z0-9]/', $password) !== 1) {
+        throw new InvalidArgumentException(
+            'Le mot de passe doit contenir au moins 14 caractères, avec minuscule, majuscule, chiffre et symbole.'
+        );
+    }
+
+    $statement = $pdo->prepare(<<<'SQL'
+        INSERT INTO users (email, password_hash, display_name, role, status)
+        VALUES (:email, :password_hash, :display_name, :role, 'active')
+        SQL);
+    $statement->execute([
+        'email' => $email,
+        'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+        'display_name' => $name,
+        'role' => $role,
+    ]);
+    echo "Compte {$role} créé pour {$email}.\n";
+
+    return 0;
+}
+
+function clearCache(string $root): int
+{
+    $directory = realpath($root . '/storage/cache');
+    $expected = realpath($root . '/storage');
+    if ($directory === false || $expected === false || !str_starts_with($directory, $expected . DIRECTORY_SEPARATOR)) {
+        throw new RuntimeException('Le répertoire de cache ne peut pas être vérifié.');
+    }
+
+    $removed = 0;
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($iterator as $item) {
+        if ($item->isLink()) {
+            continue;
+        }
+        if ($item->isFile() && $item->getFilename() !== '.gitkeep') {
+            if (!unlink($item->getPathname())) {
+                throw new RuntimeException('Impossible de supprimer un fichier de cache.');
+            }
+            $removed++;
+        } elseif ($item->isDir()) {
+            @rmdir($item->getPathname());
+        }
+    }
+    echo "Cache vidé: {$removed} fichier(s).\n";
+
+    return 0;
+}
+
+function housekeeping(PDO $pdo, Config $config): int
+{
+    $expiredRates = $pdo->exec('DELETE FROM rate_limits WHERE expires_at < UTC_TIMESTAMP(6)');
+    $oldLogins = $pdo->exec("DELETE FROM login_attempts WHERE attempted_at < UTC_TIMESTAMP(6) - INTERVAL 30 DAY");
+    $retentionDays = $config->int('security.lead_retention_days', 0);
+    $leads = (new LeadRetentionPurger())->purge($pdo, $retentionDays);
+    echo sprintf("Nettoyage technique: %d limite(s), %d tentative(s) de connexion.\n", $expiredRates, $oldLogins);
+    if (!$leads['enabled']) {
+        echo "Conservation des demandes: purge désactivée (LEAD_RETENTION_DAYS=0), aucune donnée supprimée.\n";
+    } else {
+        echo sprintf(
+            "Conservation (%d jours): %d métadonnée(s), %d consentement(s), %d contact(s), %d devis supprimé(s).\n",
+            $retentionDays,
+            $leads['metadata'],
+            $leads['consents'],
+            $leads['contacts'],
+            $leads['quotes']
+        );
+    }
+
+    return 0;
+}
+
+function launchCheck(PDO $pdo, Config $config, string $root): int
+{
+    $failures = [];
+    $environment = static fn (string $key): string => trim((string) ($_ENV[$key] ?? $_SERVER[$key] ?? ''));
+    $checks = [
+        'APP_ENV=production' => $config->string('app.env') === 'production',
+        'APP_DEBUG=false' => !$config->bool('app.debug', false),
+        'APP_URL en HTTPS' => str_starts_with($config->string('app.url'), 'https://'),
+        'APP_KEY robuste' => strlen($config->string('app.key')) >= 32
+            && !str_contains($config->string('app.key'), 'change-with'),
+        'SMTP activé' => $config->string('mail.transport') === 'smtp'
+            && $config->string('mail.host') !== ''
+            && $config->string('mail.to_address') !== ''
+            && $environment('MAIL_USER') !== ''
+            && $environment('MAIL_PASS') !== '',
+        'Notification requise' => $config->bool('mail.required', true),
+        'HSTS validé et activé' => $config->bool('security.hsts_enabled', false),
+        'CSP HTTPS activée' => $config->bool('security.upgrade_insecure_requests', false),
+    ];
+    foreach ($checks as $label => $passed) {
+        if (!$passed) {
+            $failures[] = $label;
+        }
+    }
+
+    $legalProfile = new LegalProfile($config);
+    foreach ($legalProfile->missingPublicRequirements() as $requirement) {
+        $failures[] = "Exigence légale ou confidentialité {$requirement}";
+    }
+    foreach ($legalProfile->missingLogoRequirements() as $requirement) {
+        $failures[] = "Validation du logo {$requirement}";
+    }
+
+    $adminCount = scalarCount($pdo, "SELECT COUNT(*) FROM users WHERE role = 'admin' AND status = 'active'");
+    $articleCount = scalarCount($pdo, <<<'SQL'
+        SELECT COUNT(*) FROM articles
+        WHERE status = 'published' AND published_at IS NOT NULL AND published_at <= UTC_TIMESTAMP(6)
+        SQL);
+    $caseCount = scalarCount($pdo, <<<'SQL'
+        SELECT COUNT(*) FROM case_studies
+        WHERE status = 'published' AND published_at IS NOT NULL AND published_at <= UTC_TIMESTAMP(6)
+        SQL);
+    if ($adminCount < 1) {
+        $failures[] = 'Administrateur actif créé';
+    }
+    if ($articleCount < 3) {
+        $failures[] = 'Trois insights publiés';
+    }
+    $failures = array_merge(
+        $failures,
+        (new MigrationAudit())->failures($pdo, $root . '/database/migrations')
+    );
+    if ($caseCount < 1) {
+        $failures[] = 'Au moins une réalisation vérifiée et publiée';
+    }
+
+    $manifestFile = $root . '/public/assets/build/manifest.json';
+    $manifest = is_file($manifestFile) ? json_decode((string) file_get_contents($manifestFile), true) : null;
+    foreach (['site.css', 'admin.css', 'site.js'] as $asset) {
+        $url = is_array($manifest) ? ($manifest[$asset] ?? null) : null;
+        $file = is_string($url) ? $root . '/public/' . ltrim($url, '/') : '';
+        if ($file === '' || !is_file($file)) {
+            $failures[] = "Asset de production {$asset}";
+        }
+    }
+
+    if ($failures !== []) {
+        echo "Lancement bloqué — éléments à compléter:\n";
+        foreach (array_values(array_unique($failures)) as $failure) {
+            echo "  [ ] {$failure}\n";
+        }
+
+        return 1;
+    }
+
+    echo "Tous les contrôles de lancement sont satisfaits.\n";
+
+    return 0;
+}
+
+function executeSql(PDO $pdo, string $sql): void
+{
+    foreach (splitSql($sql) as $statement) {
+        $pdo->exec($statement);
+    }
+}
+
+function scalarCount(PDO $pdo, string $sql): int
+{
+    $statement = $pdo->prepare($sql);
+    $statement->execute();
+
+    return (int) $statement->fetchColumn();
+}
+
+/** @return list<string> */
+function splitSql(string $sql): array
+{
+    $statements = [];
+    $buffer = '';
+    $quote = null;
+    $length = strlen($sql);
+    for ($index = 0; $index < $length; $index++) {
+        $character = $sql[$index];
+        $next = $index + 1 < $length ? $sql[$index + 1] : '';
+        if ($quote !== null) {
+            $buffer .= $character;
+            if ($character === '\\' && $next !== '') {
+                $buffer .= $next;
+                $index++;
+            } elseif ($character === $quote) {
+                if ($next === $quote) {
+                    $buffer .= $next;
+                    $index++;
+                } else {
+                    $quote = null;
+                }
+            }
+            continue;
+        }
+
+        if (($character === '-' && $next === '-') || $character === '#') {
+            while ($index < $length && !in_array($sql[$index], ["\n", "\r"], true)) {
+                $index++;
+            }
+            $buffer .= "\n";
+            continue;
+        }
+        if (in_array($character, ["'", '"', '`'], true)) {
+            $quote = $character;
+            $buffer .= $character;
+            continue;
+        }
+        if ($character === ';') {
+            $statement = trim($buffer);
+            if ($statement !== '') {
+                $statements[] = $statement;
+            }
+            $buffer = '';
+            continue;
+        }
+        $buffer .= $character;
+    }
+
+    $last = trim($buffer);
+    if ($last !== '') {
+        $statements[] = $last;
+    }
+
+    return $statements;
+}

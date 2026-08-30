@@ -1,0 +1,49 @@
+{
+  "name": "sctech/corporate-platform",
+  "description": "Plateforme corporate SCTECH en PHP natif.",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.2",
+    "ext-ctype": "*",
+    "ext-fileinfo": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-pdo": "*",
+    "phpmailer/phpmailer": "^6.10",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^11.5",
+    "squizlabs/php_codesniffer": "^3.13"
+  },
+  "autoload": {
+    "psr-4": {
+      "SCTech\\": "app/"
+    },
+    "files": [
+      "app/Helpers/functions.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SCTech\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "lint": "phpcs",
+    "analyse": "phpstan analyse --memory-limit=512M",
+    "check": [
+      "@lint",
+      "@analyse",
+      "@test"
+    ]
+  },
+  "config": {
+    "allow-plugins": {},
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}

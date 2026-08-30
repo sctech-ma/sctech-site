@@ -1,0 +1,20 @@
+{
+  "name": "sctech-corporate-platform",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node bin/build-assets.mjs",
+    "check:js": "node --check resources/js/site.js",
+    "test:crawl": "node bin/crawl-site.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:lighthouse": "node bin/run-lighthouse.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
+    "esbuild": "^0.25.0",
+    "lighthouse": "^13.4.1"
+  }
+}

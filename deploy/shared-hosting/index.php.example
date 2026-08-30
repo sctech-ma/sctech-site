@@ -1,0 +1,11 @@
+<?php
+
+declare(strict_types=1);
+
+use SCTech\Core\Request;
+use SCTech\Core\Router;
+
+// Adapter ce chemin au répertoire privé fourni par l’hébergeur.
+/** @var Router $router */
+$router = require '/home/account/sctech/bootstrap/app.php';
+$router->dispatch(Request::fromGlobals())->send();

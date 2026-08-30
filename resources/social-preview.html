@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aperçu social SCTECH</title>
+  <style>
+    @font-face{font-family:Manrope;src:url('../public/assets/fonts/manrope-latin.woff2') format('woff2');font-weight:200 800}
+    @font-face{font-family:'IBM Plex Mono';src:url('../public/assets/fonts/ibm-plex-mono-500-latin.woff2') format('woff2');font-weight:500}
+    *{box-sizing:border-box}
+    html,body{width:1200px;height:630px;margin:0;overflow:hidden}
+    body{position:relative;padding:52px 64px;background:#f7f4ec;color:#14211d;font-family:Manrope,Arial,sans-serif}
+    body::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0 24.9%,rgba(23,102,91,.07) 25%,transparent 25.1% 49.9%,rgba(23,102,91,.07) 50%,transparent 50.1% 74.9%,rgba(23,102,91,.07) 75%,transparent 75.1%);pointer-events:none}
+    body::after{content:'';position:absolute;width:610px;height:610px;right:-300px;top:-310px;border:1px solid rgba(47,155,136,.22);border-radius:50%;box-shadow:0 0 0 96px rgba(47,155,136,.035),0 0 0 192px rgba(47,155,136,.025)}
+    .top{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;width:196px;height:76px;padding:12px 16px;background:#fff;border:1px solid #d7ded8;border-radius:2px}
+    .brand img{display:block;width:164px;height:auto}
+    .market{font:500 14px/1.4 'IBM Plex Mono',monospace;letter-spacing:.09em;color:#17665b}
+    .main{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,720px) 1fr;gap:66px;align-items:end;margin-top:70px}
+    .kicker{margin:0 0 20px;font:500 14px/1.4 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#17665b}
+    h1{margin:0;font-size:67px;line-height:1.01;letter-spacing:-.055em;font-weight:540}
+    h1 span{display:block;color:#17665b}
+    .system{align-self:stretch;display:flex;flex-direction:column;justify-content:flex-end}
+    .system-label{display:flex;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid #d7ded8;font:500 11px/1.4 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#17665b}
+    .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:18px 0}
+    .flow i{position:relative;height:54px;border:1px solid #d7ded8;background:#fff}
+    .flow i::before{content:'';position:absolute;left:12px;right:12px;top:50%;height:1px;background:#2f9b88}
+    .flow i::after{content:'';position:absolute;right:10px;top:22px;width:7px;height:7px;border-radius:50%;background:#6acbb8}
+    .status{display:flex;justify-content:space-between;align-items:center;min-height:54px;padding:0 16px;background:#0d302a;color:#fff;font:500 12px/1.4 'IBM Plex Mono',monospace}
+    .status span{color:#6acbb8}
+    .bottom{position:absolute;z-index:1;left:64px;right:64px;bottom:40px;display:flex;justify-content:space-between;padding-top:18px;border-top:1px solid #d7ded8;font:500 12px/1.4 'IBM Plex Mono',monospace;letter-spacing:.07em;text-transform:uppercase;color:#5d6a64}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><img src="../public/assets/images/logo.png" alt="SCTECH"></div>
+    <div class="market">CASABLANCA · MAROC–EUROPE</div>
+  </header>
+  <main class="main">
+    <section>
+      <p class="kicker">FINTECH SUR MESURE · FINANCE ISLAMIQUE</p>
+      <h1>Votre logique financière.<span>Construite dans le produit.</span></h1>
+    </section>
+    <section class="system" aria-label="Logique financière opérable">
+      <div class="system-label"><span>Interface conceptuelle</span><span>Règle 04</span></div>
+      <div class="flow"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="status"><span>TRACE ACTIVE</span><strong>VALIDATION REQUISE</strong></div>
+    </section>
+  </main>
+  <footer class="bottom"><span>Logiciels financiers sur mesure</span><span>Données → Règles → Validation → Workflow → Reporting</span></footer>
+</body>
+</html>

@@ -1,0 +1,23 @@
+.breadcrumbs a,
+.contact-coordinate > a,
+.insight-article__aside > a,
+.checkbox-field label a,
+.legal-content a,
+.error-summary a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.contact-coordinate > a {
+  margin-block: 8px;
+}
+
+.insight-article__aside > a {
+  margin-top: 10px;
+}
+
+.visual-journey .is-done > span {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+}

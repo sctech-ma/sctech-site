@@ -1,0 +1,9 @@
+parameters:
+    level: 7
+    paths:
+        - app
+        - bootstrap
+        - routes
+        - bin/console
+    excludePaths:
+        - app/Views

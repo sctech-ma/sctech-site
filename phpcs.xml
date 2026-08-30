@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<ruleset name="SCTECH">
+    <description>SCTECH PSR-12 coding standard.</description>
+    <file>app</file>
+    <file>bootstrap</file>
+    <file>config</file>
+    <file>routes</file>
+    <file>tests</file>
+    <exclude-pattern>app/Views/*</exclude-pattern>
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg name="warning-severity" value="0"/>
+    <rule ref="PSR12">
+        <!-- Compact in-file fakes keep behavior-focused tests readable. -->
+        <exclude name="PSR1.Classes.ClassDeclaration.MultipleClasses"/>
+    </rule>
+</ruleset>

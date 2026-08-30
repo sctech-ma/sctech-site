@@ -1,0 +1,23 @@
+.quote-hero ol {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.quote-hero li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  min-height: 58px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+}
+
+.quote-hero li span {
+  color: var(--mint);
+  font: 500 0.64rem/1 var(--font-mono);
+}

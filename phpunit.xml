@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="SCTECH">
+            <directory>tests/Unit</directory>
+            <directory>tests/Feature</directory>
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_DEBUG" value="true" force="true"/>
+        <env name="APP_KEY" value="testing-key-testing-key-testing-key-testing-key-testing-key-1234" force="true"/>
+        <env name="FORM_MAIL_REQUIRED" value="false" force="true"/>
+    </php>
+</phpunit>
