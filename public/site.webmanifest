@@ -4,8 +4,8 @@
   "description": "Logiciels financiers sur mesure, construits autour de vos règles métier.",
   "start_url": "/",
   "display": "browser",
-  "background_color": "#F7F4EC",
-  "theme_color": "#0D302A",
+  "background_color": "#F5FAF8",
+  "theme_color": "#081F2A",
   "lang": "fr",
   "icons": [
     {

@@ -26,7 +26,7 @@ $footerPath = static function (string $name, array $parameters = []) use ($route
         </div>
         <div class="site-footer__grid">
             <div class="site-footer__brand">
-                <a class="brand brand--footer" href="<?= e($footerPath('home')) ?>" aria-label="SCTECH — Accueil"><span class="brand__plate"><img src="/assets/images/logo.png" width="1025" height="326" alt="SCTECH"></span></a>
+                <a class="brand brand--footer" href="<?= e($footerPath('home')) ?>" aria-label="SCTECH — Accueil"><span class="brand__plate"><img src="<?= e(asset('assets/images/logo.png')) ?>" width="1866" height="697" alt="SCTECH"></span></a>
                 <p>Logiciels financiers sur mesure, conçus autour de vos règles métier, de vos contrôles et de vos opérations.</p>
                 <p>Casablanca, Maroc<br>Collaboration Maroc · Afrique · Europe</p>
             </div>

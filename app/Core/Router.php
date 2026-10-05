@@ -44,6 +44,23 @@ final class Router
         $this->baseUrl = rtrim($baseUrl, '/');
     }
 
+    public function setBaseUrl(string $baseUrl): self
+    {
+        $this->baseUrl = rtrim($baseUrl, '/');
+
+        return $this;
+    }
+
+    public function baseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    public function container(): Container
+    {
+        return $this->container;
+    }
+
     public function get(string $uri, mixed $handler): Route
     {
         return $this->add(['GET'], $uri, $handler);
@@ -175,10 +192,11 @@ final class Router
                 $location .= '?' . $query;
             }
 
+            $target = $request->basePath() . $location;
             $response = $this->runPipeline(
                 $request,
                 $this->globalMiddleware,
-                fn (): Response => Response::redirect($location, 308)
+                fn (): Response => Response::redirect($target, 308)
             );
 
             return $request->isMethod('HEAD') ? $response->forHead() : $response;

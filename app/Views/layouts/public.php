@@ -45,7 +45,7 @@ if (isset($schema) && is_array($schema)) {
     <title><?= e($title) ?></title>
     <meta name="description" content="<?= e($description) ?>">
     <meta name="robots" content="<?= e((string) $robots) ?>">
-    <meta name="theme-color" content="#F7F4EC">
+    <meta name="theme-color" content="#F5FAF8">
     <meta name="color-scheme" content="light">
     <?php if (is_string($canonical) && $canonical !== ''): ?><link rel="canonical" href="<?= e($canonical) ?>"><?php endif; ?>
     <meta property="og:locale" content="fr_FR">
@@ -65,13 +65,13 @@ if (isset($schema) && is_array($schema)) {
     <meta name="twitter:title" content="<?= e($title) ?>">
     <meta name="twitter:description" content="<?= e($description) ?>">
     <?php if ($ogImage !== null): ?><meta name="twitter:image" content="<?= e((string) $ogImage) ?>"><?php endif; ?>
-    <link rel="icon" href="/assets/images/favicon.ico" sizes="any">
-    <link rel="icon" href="/assets/images/favicon-32x32.png" type="image/png" sizes="32x32">
-    <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="preload" href="/assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="icon" href="<?= e(asset('assets/images/favicon.ico')) ?>" sizes="any">
+    <link rel="icon" href="<?= e(asset('assets/images/favicon-32x32.png')) ?>" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="<?= e(asset('assets/images/apple-touch-icon.png')) ?>" sizes="180x180">
+    <link rel="manifest" href="<?= e(asset('site.webmanifest')) ?>">
+    <link rel="preload" href="<?= e(asset('assets/fonts/manrope-latin.woff2')) ?>" as="font" type="font/woff2" crossorigin>
     <script<?= $nonceAttribute ?>>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
-    <link rel="stylesheet" href="<?= e($assetUrl('site.css', '/assets/css/site.css')) ?>">
+    <link rel="stylesheet" href="<?= e($assetUrl('site.css', asset('assets/css/site.css'))) ?>">
     <?php foreach ($schemaPayloads as $schemaPayload): ?>
         <?php if (is_array($schemaPayload)): ?><script type="application/ld+json"<?= $nonceAttribute ?>><?= json_encode($schemaPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script><?php endif; ?>
     <?php endforeach; ?>

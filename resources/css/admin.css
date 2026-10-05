@@ -15,19 +15,19 @@
 }
 
 :root {
-    --admin-midnight: #071820;
-    --admin-graphite: #0c2530;
-    --admin-paper: #f4f1e9;
-    --admin-white: #fff;
-    --admin-teal: #075f5a;
-    --admin-signal: #139a90;
-    --admin-cyan: #62d7cc;
-    --admin-cobalt: #2f62ff;
-    --admin-success: #187553;
+    --admin-midnight: #081f2a;
+    --admin-graphite: #0c2734;
+    --admin-paper: #f5faf8;
+    --admin-white: #ffffff;
+    --admin-teal: #064e46;
+    --admin-signal: #10a788;
+    --admin-cyan: #00c49a;
+    --admin-cobalt: #10a788;
+    --admin-success: #10a788;
     --admin-error: #b3263e;
-    --admin-ink-soft: #53666c;
-    --admin-line: rgba(7, 24, 32, 0.16);
-    --admin-line-dark: rgba(255, 255, 255, 0.16);
+    --admin-ink-soft: #4d636e;
+    --admin-line: rgba(8, 31, 42, 0.12);
+    --admin-line-dark: rgba(255, 255, 255, 0.14);
     --admin-sans: "Manrope", "Segoe UI", Arial, sans-serif;
     --admin-mono: "IBM Plex Mono", Consolas, monospace;
 }
@@ -39,8 +39,8 @@ body {
     min-width: 20rem;
     color: var(--admin-midnight);
     background:
-        linear-gradient(90deg, transparent calc(100% - 1px), rgba(7, 24, 32, 0.045) 1px) 0 0 / min(8.333vw, 10rem) 100%,
-        #f8f6ef;
+        linear-gradient(90deg, transparent calc(100% - 1px), rgba(8, 31, 42, 0.04) 1px) 0 0 / min(8.333vw, 10rem) 100%,
+        #f5faf8;
     font: 400 1rem/1.6 var(--admin-sans);
 }
 

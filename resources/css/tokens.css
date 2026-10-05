@@ -1,8 +1,8 @@
 @font-face{font-family:Manrope;src:url('/assets/fonts/manrope-latin.woff2') format('woff2');font-style:normal;font-weight:200 800;font-display:swap}
 @font-face{font-family:'IBM Plex Mono';src:url('/assets/fonts/ibm-plex-mono-500-latin.woff2') format('woff2');font-style:normal;font-weight:500;font-display:swap}
 :root{
-  --canvas:#f7f4ec;--white:#fff;--sage:#eaf4ef;--ink:#14211d;--muted:#5d6a64;--line:#d7ded8;
-  --brand:#2f9b88;--brand-dark:#17665b;--forest:#0d302a;--mint:#6acbb8;--error:#b3263e;--success:#187553;
+  --canvas:#f5faf8;--white:#fff;--sage:#e1efe9;--ink:#081f2a;--muted:#4d636e;--line:#d1dfd9;
+  --brand:#10a788;--brand-dark:#064e46;--forest:#081f2a;--mint:#00c49a;--error:#b3263e;--success:#10a788;
   --font-sans:Manrope,system-ui,-apple-system,'Segoe UI',sans-serif;--font-mono:'IBM Plex Mono',ui-monospace,monospace;
   --shell:1280px;--gutter:clamp(20px,4vw,48px);--header:84px;
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;
@@ -12,6 +12,6 @@
   --step-1:clamp(1.15rem,1.02rem + .5vw,1.45rem);--step-2:clamp(1.4rem,1.15rem + 1vw,2rem);
   --step-3:clamp(1.85rem,1.35rem + 1.8vw,2.9rem);--step-4:clamp(2.4rem,1.55rem + 3.3vw,4.7rem);
   --step-5:clamp(3rem,1.6rem + 5.2vw,6.6rem);
-  --ease:cubic-bezier(.22,1,.36,1);--shadow-nav:0 12px 36px rgba(13,48,42,.09);
+  --ease:cubic-bezier(.22,1,.36,1);--shadow-nav:0 12px 36px rgba(8,31,42,.08);
 }
 

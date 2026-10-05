@@ -29,7 +29,7 @@ $isActive = static function (string $href) use ($currentPath): bool {
 ?>
 <header class="site-header" data-site-header>
     <div class="site-header__inner shell">
-        <a class="brand" href="<?= e($namedPath('home')) ?>" aria-label="SCTECH — Accueil"><span class="brand__plate"><img src="/assets/images/logo.png" width="1025" height="326" alt="SCTECH"></span></a>
+        <a class="brand" href="<?= e($namedPath('home')) ?>" aria-label="SCTECH — Accueil"><span class="brand__plate"><img src="<?= e(asset('assets/images/logo.png')) ?>" width="1866" height="697" alt="SCTECH"></span></a>
         <nav class="desktop-nav" aria-label="Navigation principale"><ul>
             <?php foreach ($navigation as $item): ?><li><a href="<?= e($item['href']) ?>"<?= $isActive($item['href']) ? ' aria-current="page"' : '' ?>><?= e($item['label']) ?></a></li><?php endforeach; ?>
         </ul></nav>

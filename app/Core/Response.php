@@ -53,6 +53,18 @@ final class Response
         return new self($json, $status, ['Content-Type' => 'application/json; charset=UTF-8'] + $headers);
     }
 
+    private static string $basePath = '';
+
+    public static function setBasePath(string $basePath): void
+    {
+        self::$basePath = rtrim($basePath, '/');
+    }
+
+    public static function basePath(): string
+    {
+        return self::$basePath;
+    }
+
     /**
      * @param array<string, string|list<string>> $headers
      * @param list<string> $allowedHosts
@@ -65,6 +77,12 @@ final class Response
     ): self {
         if (!in_array($status, [301, 302, 303, 307, 308], true)) {
             throw new InvalidArgumentException('Redirect status must be 301, 302, 303, 307, or 308.');
+        }
+
+        if (self::$basePath !== '' && str_starts_with($location, '/') && !str_starts_with($location, '//')) {
+            if (!str_starts_with($location, self::$basePath . '/') && $location !== self::$basePath) {
+                $location = self::$basePath . $location;
+            }
         }
 
         if (!Url::isSafeRedirect($location, $allowedHosts)) {

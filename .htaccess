@@ -1,0 +1,16 @@
+Options -Indexes -MultiViews
+
+<FilesMatch "(^\.|\.(?:env|ini|log|sql|bak|dist|md|lock|json|neon|xml)$)">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Deny direct access to private directories
+    RewriteRule ^(app|bin|bootstrap|config|database|deploy|docs|lang|node_modules|storage|tests|vendor)(/|$) - [F,L,NC]
+
+    # Rewrite all traffic into public/ directory
+    RewriteCond %{REQUEST_URI} !/public/ [NC]
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

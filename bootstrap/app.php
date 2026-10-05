@@ -88,7 +88,13 @@ if (is_file($manifestFile)) {
     }
 }
 $view = new View($config->string('app.view_path', $root . '/app/Views'));
-$view->shareMany(['assetManifest' => $manifest]);
+$view->shareMany([
+    'assetManifest' => $manifest,
+    'asset' => static function (string $path) use ($manifest): string {
+        $resolved = $manifest[$path] ?? $path;
+        return asset($resolved);
+    },
+]);
 $container->instance(View::class, $view);
 
 $container->singleton(Clock::class, SystemClock::class);

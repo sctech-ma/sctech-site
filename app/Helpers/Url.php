@@ -80,13 +80,30 @@ final class Url
         return $fallback;
     }
 
+    private static string $basePath = '';
+
+    public static function setBasePath(string $basePath): void
+    {
+        self::$basePath = rtrim($basePath, '/');
+    }
+
+    public static function basePath(): string
+    {
+        return self::$basePath;
+    }
+
     public static function to(string $path = '', ?string $base = null): string
     {
         if (self::isAbsoluteHttpUrl($path)) {
             return $path;
         }
 
-        $base = rtrim((string) ($base ?? ''), '/');
+        if (self::$basePath !== '') {
+            $base = self::$basePath;
+        } else {
+            $base = rtrim((string) ($base ?? ''), '/');
+        }
+
         $path = ltrim($path, '/');
 
         return $path === '' ? ($base === '' ? '/' : $base . '/') : $base . '/' . $path;

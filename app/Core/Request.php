@@ -28,7 +28,8 @@ final class Request
         private readonly array $server = [],
         private readonly array $headers = [],
         private readonly array $attributes = [],
-        private readonly string $rawBody = ''
+        private readonly string $rawBody = '',
+        private readonly string $basePath = ''
     ) {
     }
 
@@ -38,9 +39,17 @@ final class Request
         $server ??= $_SERVER;
         $method = strtoupper((string) ($server['REQUEST_METHOD'] ?? 'GET'));
         $uri = (string) ($server['REQUEST_URI'] ?? '/');
-        $path = parse_url($uri, PHP_URL_PATH);
-        $path = is_string($path) && $path !== '' ? $path : '/';
-        $path = str_starts_with($path, '/') ? $path : '/' . $path;
+        $rawPath = parse_url($uri, PHP_URL_PATH);
+        $rawPath = is_string($rawPath) && $rawPath !== '' ? $rawPath : '/';
+        $rawPath = str_starts_with($rawPath, '/') ? $rawPath : '/' . $rawPath;
+
+        $basePath = self::detectBasePath($server, $rawPath);
+        $path = $rawPath;
+        if ($basePath !== '' && str_starts_with($path, $basePath)) {
+            $path = substr($path, strlen($basePath));
+            $path = $path === '' || !str_starts_with($path, '/') ? '/' . $path : $path;
+        }
+
         $headers = self::headersFromServer($server);
         $rawBody = (string) file_get_contents('php://input');
         $body = $_POST;
@@ -68,7 +77,8 @@ final class Request
             $server,
             $headers,
             [],
-            $rawBody
+            $rawBody,
+            $basePath
         );
     }
 
@@ -121,6 +131,11 @@ final class Request
     public function path(): string
     {
         return $this->path;
+    }
+
+    public function basePath(): string
+    {
+        return $this->basePath;
     }
 
     public function queryString(): string
@@ -220,7 +235,8 @@ final class Request
             $this->server,
             $this->headers,
             $attributes,
-            $this->rawBody
+            $this->rawBody,
+            $this->basePath
         );
     }
 
@@ -396,5 +412,38 @@ final class Request
         }
 
         return false;
+    }
+
+    /** @param array<string, mixed> $server */
+    public static function detectBasePath(array $server, string $rawPath = ''): string
+    {
+        $scriptName = str_replace('\\', '/', (string) ($server['SCRIPT_NAME'] ?? ''));
+        if ($scriptName === '') {
+            return '';
+        }
+
+        $scriptDir = rtrim(dirname($scriptName), '/');
+        if ($scriptDir === '' || $scriptDir === '.') {
+            return '';
+        }
+
+        if (str_ends_with($scriptDir, '/public')) {
+            $parentDir = substr($scriptDir, 0, -7);
+            if ($rawPath !== '') {
+                if (str_starts_with($rawPath, $scriptDir . '/') || $rawPath === $scriptDir) {
+                    return $scriptDir;
+                }
+                if ($parentDir !== '' && (str_starts_with($rawPath, $parentDir . '/') || $rawPath === $parentDir)) {
+                    return $parentDir;
+                }
+            }
+            return $parentDir !== '' ? $parentDir : $scriptDir;
+        }
+
+        if ($rawPath === '' || str_starts_with($rawPath, $scriptDir . '/') || $rawPath === $scriptDir) {
+            return $scriptDir;
+        }
+
+        return '';
     }
 }

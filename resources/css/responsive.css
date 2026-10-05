@@ -40,7 +40,7 @@
   .case-index-grid,.case-grid{grid-template-columns:1fr}
 }
 @media(max-width:430px){
-  :root{--gutter:16px}.brand{width:122px}.brand__plate{padding:6px 8px}.brand img{width:106px}.mobile-nav summary{min-width:76px}
+  :root{--gutter:16px}.brand{width:auto}.brand__plate{padding:4px 8px}.brand img{width:118px;height:auto;aspect-ratio:1866/697}.mobile-nav summary{min-width:76px}
   .button-group{display:grid}.button-group .button{width:100%}.pp-hero__coordinates{grid-template-columns:1fr}.pp-hero__coordinates div{padding:12px 0;border-bottom:1px solid var(--line)}
   .logic-system__canvas{padding:10px}.logic-system figcaption,.solution-visual figcaption{align-items:flex-start;flex-direction:column;gap:4px}.logic-system__rule{padding:12px}
   .workflow-band ol,.security-ledger{grid-template-columns:1fr}.solution-visual>div,.solution-visual>ol{min-height:250px}.visual-integrations{gap:80px 50px;padding-inline:10px}.visual-integrations>span:not(.visual-integrations__core){width:90px}

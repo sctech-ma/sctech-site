@@ -36,8 +36,8 @@ Ce dépôt est une application PHP native. Toute modification future doit prése
 
 ## Design system
 
-- Concept : **Principes programmables** — surfaces ivoire, rigueur institutionnelle et règles/validations rendues opérables.
-- Palette verrouillée : canvas `#F7F4EC`, blanc `#FFFFFF`, sauge `#EAF4EF`, encre `#14211D`, texte secondaire `#5D6A64`, bordure `#D7DED8`, vert SCTECH `#2F9B88`, vert accessible `#17665B`, forêt `#0D302A` et menthe du logo `#6ACBB8`.
+- Concept : **Principes programmables** — surfaces claires menthe/ivoire, rigueur institutionnelle et règles/validations rendues opérables.
+- Palette verrouillée : canvas `#F5FAF8`, blanc `#FFFFFF`, sauge `#E1EFE9`, encre `#081F2A`, texte secondaire `#4D636E`, bordure `#D1DFD9`, vert SCTECH `#10A788`, vert accessible / forêt `#064E46` et menthe du logo `#00C49A`.
 - Manrope pour l’interface, IBM Plex Mono pour les labels techniques, toujours locales.
 - Base d’espacement 4 px, rayons 2/8/16 px, ombres réservées aux navigations et surfaces réellement élevées.
 - Conserver les cibles 44 px, le focus visible, le skip link, les titres logiques et les contrôles natifs.

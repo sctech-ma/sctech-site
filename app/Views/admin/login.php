@@ -22,7 +22,7 @@ $errors = is_array($errors ?? null) ? $errors : [];
         </div>
     <?php endif; ?>
 
-    <form id="formulaire-connexion" method="post" action="/admin/login" novalidate>
+    <form id="formulaire-connexion" method="post" action="<?= e(url('/admin/login')) ?>" novalidate>
         <input type="hidden" name="_csrf" value="<?= e((string) $csrf) ?>">
         <div class="field">
             <label for="email">Adresse e-mail</label>
