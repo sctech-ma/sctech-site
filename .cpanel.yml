@@ -1,20 +1,13 @@
 ---
 deployment:
   tasks:
-    # 1. Definir le chemin cible du document root public_html.
-    - export DEPLOYPATH=/home/sctec2n2/public_html
-    # 2. Creer les dossiers publics necessaires.
-    - /bin/mkdir -p $DEPLOYPATH/assets
+    - export DEPLOYPATH=/home/sctec2n2/public_html/
+    - /bin/cp public/index.php $DEPLOYPATH
+    - /bin/cp public/.htaccess $DEPLOYPATH
+    - /bin/cp public/site.webmanifest $DEPLOYPATH
+    - /bin/cp -n public/env.example.php $DEPLOYPATH
+    - /bin/cp -R public/assets $DEPLOYPATH
     - /bin/mkdir -p $DEPLOYPATH/uploads
-    # 3. Deployer les fichiers publics racines requis.
-    - /bin/cp public/index.php $DEPLOYPATH/index.php
-    - /bin/cp public/.htaccess $DEPLOYPATH/.htaccess
-    - /bin/cp public/site.webmanifest $DEPLOYPATH/site.webmanifest
-    - /bin/cp -n public/env.example.php $DEPLOYPATH/env.example.php
-    # 4. Deployer les assets publics (CSS, JS, images, polices).
-    - /bin/cp -R public/assets/* $DEPLOYPATH/assets/
-    # 5. Deployer la protection d'uploads sans ecraser ni supprimer les fichiers uploades.
-    - /bin/cp public/uploads/.htaccess $DEPLOYPATH/uploads/.htaccess
-    # 6. Configurer les permissions d'acces (0755 pour repertoires, 0644 pour fichiers).
+    - /bin/cp public/uploads/.htaccess $DEPLOYPATH/uploads/
     - /bin/chmod 755 $DEPLOYPATH/assets $DEPLOYPATH/uploads
-    - /bin/chmod 644 $DEPLOYPATH/index.php $DEPLOYPATH/.htaccess $DEPLOYPATH/site.webmanifest $DEPLOYPATH/uploads/.htaccess $DEPLOYPATH/env.example.php
+    - /bin/chmod 644 $DEPLOYPATH/index.php $DEPLOYPATH/.htaccess $DEPLOYPATH/site.webmanifest $DEPLOYPATH/uploads/.htaccess
