@@ -3,9 +3,24 @@
 declare(strict_types=1);
 
 use SCTech\Core\Request;
+use SCTech\Core\Response;
 use SCTech\Core\Router;
+use SCTech\Helpers\Url;
 
-// Adapter ce chemin au répertoire privé fourni par l’hébergeur.
+// Exemple de point d'entrée pour hébergement mutualisé cPanel (public_html/index.php).
+// Note : public/index.php intègre désormais la détection dynamique automatique
+// du dossier sibling (/home/<cpanel-user>/sctech-site/bootstrap/app.php).
+// Ce fichier sert de référence si vous souhaitez forcer un chemin absolu statique :
+if (!defined('SCTECH_PUBLIC_PATH')) {
+    define('SCTECH_PUBLIC_PATH', __DIR__);
+}
+
 /** @var Router $router */
-$router = require '/home/account/sctech/bootstrap/app.php';
-$router->dispatch(Request::fromGlobals())->send();
+$router = require '/home/<cpanel-user>/sctech-site/bootstrap/app.php';
+$request = Request::fromGlobals();
+if ($request->basePath() !== '') {
+    $router->setBaseUrl($request->basePath());
+    Response::setBasePath($request->basePath());
+    Url::setBasePath($request->basePath());
+}
+$router->dispatch($request)->send();

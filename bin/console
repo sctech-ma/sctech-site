@@ -296,11 +296,16 @@ function launchCheck(PDO $pdo, Config $config, string $root): int
         $failures[] = 'Au moins une réalisation vérifiée et publiée';
     }
 
-    $manifestFile = $root . '/public/assets/build/manifest.json';
+    $publicPath = $config->string('app.public_path', $root . '/public');
+    $manifestFile = $publicPath . '/assets/build/manifest.json';
+    if (!is_file($manifestFile) && is_file($root . '/public/assets/build/manifest.json')) {
+        $manifestFile = $root . '/public/assets/build/manifest.json';
+        $publicPath = $root . '/public';
+    }
     $manifest = is_file($manifestFile) ? json_decode((string) file_get_contents($manifestFile), true) : null;
     foreach (['site.css', 'admin.css', 'site.js'] as $asset) {
         $url = is_array($manifest) ? ($manifest[$asset] ?? null) : null;
-        $file = is_string($url) ? $root . '/public/' . ltrim($url, '/') : '';
+        $file = is_string($url) ? $publicPath . '/' . ltrim($url, '/') : '';
         if ($file === '' || !is_file($file)) {
             $failures[] = "Asset de production {$asset}";
         }

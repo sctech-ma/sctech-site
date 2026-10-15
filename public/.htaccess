@@ -1,5 +1,5 @@
 Options -Indexes -MultiViews
-DirectoryIndex index.php
+DirectoryIndex index.php index.html
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -38,7 +38,7 @@ DirectoryIndex index.php
     AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json application/xml image/svg+xml
 </IfModule>
 
-<FilesMatch "(^\.|\.(?:env|ini|log|sql|bak|dist|md|lock|json)$)">
+<FilesMatch "(^\.|\.(?:env|ini|log|sql|bak|dist|md|lock|json|ya?ml|neon)$|env(\.example)?\.php$)">
     Require all denied
 </FilesMatch>
 

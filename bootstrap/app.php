@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+if (!defined('SCTECH_BOOTSTRAPPED')) {
+    define('SCTECH_BOOTSTRAPPED', true);
+}
+
 use Dotenv\Dotenv;
 use SCTech\Core\Config;
 use SCTech\Core\Container;
@@ -41,6 +45,42 @@ require $root . '/vendor/autoload.php';
 
 Dotenv::createImmutable($root)->safeLoad();
 
+// Configuration pour hébergement mutualisé cPanel sans terminal :
+// Permet de configurer le site directement via un fichier dans public_html (env.php ou .env).
+$publicDir = defined('SCTECH_PUBLIC_PATH')
+    ? (string) constant('SCTECH_PUBLIC_PATH')
+    : (is_dir(dirname($root) . '/public_html')
+        ? dirname($root) . '/public_html'
+        : (is_dir(dirname($root, 2) . '/public_html')
+            ? dirname($root, 2) . '/public_html'
+            : $root . '/public'));
+
+$isTesting = (getenv('APP_ENV') === 'testing' || ($_ENV['APP_ENV'] ?? '') === 'testing' || defined('PHPUNIT_COMPOSER_INSTALL'));
+$isCpanelPublicHtml = str_contains(str_replace('\\', '/', $publicDir), 'public_html');
+
+if (!$isTesting && is_dir($publicDir)) {
+    // Sur cPanel public_html, ou en environnement sans fichier .env racine :
+    if ($isCpanelPublicHtml || !is_file($root . '/.env')) {
+        if (is_file($publicDir . '/.env')) {
+            Dotenv::createImmutable($publicDir)->safeLoad();
+        }
+        if (is_file($publicDir . '/env.php')) {
+            /** @var mixed $publicConfig */
+            $publicConfig = require $publicDir . '/env.php';
+            if (is_array($publicConfig)) {
+                foreach ($publicConfig as $key => $val) {
+                    if (is_string($key) && (is_scalar($val) || $val === null)) {
+                        $strVal = (string) ($val ?? '');
+                        $_ENV[$key] = $strVal;
+                        $_SERVER[$key] = $strVal;
+                        putenv("{$key}={$strVal}");
+                    }
+                }
+            }
+        }
+    }
+}
+
 $config = Config::fromDirectory($root . '/config');
 date_default_timezone_set($config->string('app.timezone', 'UTC'));
 
@@ -79,8 +119,13 @@ $logFile = $root . '/storage/logs/app.log';
 $logger = new Logger($logFile, $debug ? 'debug' : 'info', ['application' => 'sctech']);
 $container->instance(Logger::class, $logger);
 
+$publicPath = (string) $config->string('app.public_path', $root . '/public');
+
 $manifest = [];
-$manifestFile = $root . '/public/assets/build/manifest.json';
+$manifestFile = $publicPath . '/assets/build/manifest.json';
+if (!is_file($manifestFile) && is_file($root . '/public/assets/build/manifest.json')) {
+    $manifestFile = $root . '/public/assets/build/manifest.json';
+}
 if (is_file($manifestFile)) {
     $decodedManifest = json_decode((string) file_get_contents($manifestFile), true);
     if (is_array($decodedManifest)) {
@@ -137,7 +182,7 @@ $container->singleton(QuoteWorkflow::class, static fn (Container $services): Quo
 $container->singleton(MediaUploadService::class, static fn (Container $services): MediaUploadService => new MediaUploadService(
     $services->get(SCTech\Repositories\MediaRepository::class),
     $services->get(SCTech\Repositories\AdminAuditRepository::class),
-    $root . '/public/uploads',
+    $publicPath . '/uploads',
     (array) $config->get('security.upload_mimes', []),
     $config->int('security.upload_max_bytes', 5 * 1024 * 1024),
     $config->int('security.upload_max_pixels', 20_000_000)

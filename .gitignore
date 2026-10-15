@@ -1,7 +1,9 @@
 /.env
+/public/env.php
 /vendor/
 /node_modules/
-/public/assets/build/
+# Built assets tracked for hosting environments without Node.js CLI
+!/public/assets/build/
 /public/uploads/*
 !/public/uploads/.htaccess
 !/public/uploads/.gitkeep
